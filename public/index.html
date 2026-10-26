@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0b1030">
+  <title>Project Arena</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ctext y=%2726%27 font-size=%2726%27%3E%E2%9A%94%EF%B8%8F%3C/text%3E%3C/svg%3E">
+  <!-- Fonts: Rajdhani (headings/numbers), Exo 2 (UI), Orbitron (logo). System fonts are the fallback if Google Fonts is unreachable. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- The font stylesheet is added by js/fonts.js so a slow or blocked fonts.googleapis.com cannot delay the first paint. -->
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body data-screen="boot" class="splashing">
+  <!-- لودینگ اول: فیلم با صدای خودش + نوار پیشرفت ۱ تا ۱۰۰ -->
+  <div id="splash" class="splash-video" role="status" aria-live="polite">
+    <div class="splash-stage">
+      <video id="splash-video" playsinline webkit-playsinline preload="auto" poster="/assets/video/loading-poster.jpg" disablepictureinpicture>
+        <source src="/assets/video/loading.mp4" type="video/mp4">
+        <source src="/assets/video/loading.webm" type="video/webm">
+      </video>
+      <div class="splash-shade" aria-hidden="true"></div>
+      <button id="splash-sound" class="splash-sound" type="button" hidden></button>
+      <div class="splash-load" dir="ltr">
+        <div id="splash-bar" class="splash-bar" role="progressbar" aria-valuemin="1" aria-valuemax="100" aria-valuenow="1"><i id="splash-fill"></i></div>
+        <span id="splash-pct" class="splash-pct">1%</span>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="fx-bg" aria-hidden="true"></canvas>
+  <div id="app">
+
+    <!-- بارگذاری اولیه -->
+    <section id="screen-boot" class="screen center splash active">
+      <div class="logo"><span class="logo-crest" aria-hidden="true"></span><h1 class="brand" data-game-name>Project Arena</h1></div>
+      <div class="load-bar" aria-hidden="true"><i></i></div>
+      <p id="boot-text" class="muted"></p>
+    </section>
+
+    <!-- ورود مهمان -->
+    <section id="screen-login" class="screen center splash">
+      <div class="logo"><span class="logo-crest" aria-hidden="true"></span><h1 class="brand" data-game-name>Project Arena</h1></div>
+      <div class="panel login-panel">
+        <h2 id="login-title"></h2>
+        <form id="login-form" autocomplete="off" novalidate>
+          <label for="login-name" id="login-name-label"></label>
+          <input id="login-name" name="name" type="text" maxlength="16" inputmode="text" enterkeyhint="go">
+          <small id="login-hint" class="muted"></small>
+          <p id="login-error" class="error-text" role="alert" hidden></p>
+          <button id="login-submit" class="btn gold big" type="submit"></button>
+        </form>
+        <p id="login-note" class="muted note"></p>
+      </div>
+    </section>
+
+    <!-- خانه -->
+    <section id="screen-home" class="screen home">
+      <div class="home-bg" aria-hidden="true"></div>
+
+      <!-- نوار وضعیت: سطح/سکه/جواهر هنوز در سرور وجود ندارند؛ فقط جایگاه نمایش (بدون عدد ساختگی) -->
+      <header class="hud-top">
+        <div class="lvl locked" aria-hidden="true"><span class="lvl-badge">★</span><span class="lvl-bar"><i></i></span></div>
+        <button class="cur gold locked" type="button" data-soon aria-label=""><i class="coin" aria-hidden="true"></i><b>—</b><span class="plus" aria-hidden="true">+</span></button>
+        <button class="cur gem locked" type="button" data-soon aria-label=""><i class="crystal" aria-hidden="true"></i><b>—</b><span class="plus" aria-hidden="true">+</span></button>
+      </header>
+
+      <div class="profile">
+        <div class="profile-art" aria-hidden="true"><img src="/assets/art/hero.webp" alt="" decoding="async"></div>
+        <div class="quick">
+          <button id="btn-friends-quick" class="qbtn" type="button"><i class="ico ico-friends"></i></button>
+          <button id="btn-news" class="qbtn locked" type="button" data-soon><i class="ico ico-news"></i></button>
+          <button id="btn-menu" class="qbtn" type="button"><i class="ico ico-menu"></i></button>
+        </div>
+        <div class="nameplate">
+          <div class="np-text"><strong id="home-welcome"></strong><span class="home-badge" id="home-badge"></span></div>
+          <div class="np-trophy locked" data-soon role="button" tabindex="0"><i class="ico ico-trophy"></i><b>—</b></div>
+        </div>
+      </div>
+
+      <button class="season locked" type="button" data-soon>
+        <span class="season-emblem" aria-hidden="true">♛</span>
+        <span class="season-txt"><b data-i18n="home.league"></b><small data-i18n="home.soon"></small></span>
+        <span class="season-frac" aria-hidden="true">— / —</span>
+      </button>
+
+      <div class="home-stage">
+        <h1 class="brand" data-game-name>Project Arena</h1>
+        <div class="island-wrap" aria-hidden="true"><div class="island-glow"></div><img class="island" src="/assets/art/island.webp" alt="" decoding="async"></div>
+
+        <button id="btn-practice" class="orb orb-potion" type="button"><span class="orb-disc"><img src="/assets/art/potion.webp" alt="" decoding="async"></span><em data-i18n="home.practiceShort"></em></button>
+        <button id="btn-deck-orb" class="orb orb-cards" type="button"><span class="orb-disc"><img src="/assets/art/cards.webp" alt="" decoding="async"></span><em data-i18n="nav.cards"></em></button>
+        <button id="btn-friendly" class="orb orb-friends" type="button"><span class="orb-disc"><i class="ico ico-friends"></i></span><em data-i18n="home.friendlyShort"></em></button>
+
+        <div id="home-deck" class="platform" role="button" tabindex="0">
+          <span class="muted" id="home-deck-label"></span>
+          <div id="home-deck-strip" class="deck-strip"></div>
+        </div>
+      </div>
+
+      <div class="chest-dock" data-soon>
+        <span class="dock-title" data-i18n="home.chests"></span>
+        <div class="chest-slots">
+          <div class="chest-slot"><i class="ico ico-chest"></i><b>🔒</b></div>
+          <div class="chest-slot"><i class="ico ico-chest"></i><b>🔒</b></div>
+          <div class="chest-slot"><i class="ico ico-chest"></i><b>🔒</b></div>
+          <div class="chest-slot"><i class="ico ico-chest"></i><b>🔒</b></div>
+        </div>
+      </div>
+
+      <div class="battle-row">
+        <button id="btn-profile" class="side-btn avatar" type="button"><span class="av-ring"><span class="av-face"></span></span></button>
+        <button id="btn-online" class="btn gold huge" type="button"><span class="btn-title" data-i18n="home.battle"></span><small data-i18n="home.battleSub"></small></button>
+        <button class="side-btn trophy locked" type="button" data-soon><i class="ico ico-trophy"></i></button>
+      </div>
+
+      <nav class="bottom-nav" aria-label="">
+        <button id="btn-deck" class="nav-item" type="button"><i class="ico ico-cards"></i><span data-i18n="nav.cards"></span></button>
+        <button class="nav-item locked" type="button" data-soon><i class="ico ico-shop"></i><span data-i18n="nav.shop"></span></button>
+        <button class="nav-item active center" type="button" aria-current="page"><i class="ico ico-bolt"></i><span data-i18n="nav.battle"></span></button>
+        <button id="btn-friends" class="nav-item" type="button"><i class="ico ico-friends"></i><span data-i18n="nav.friends"></span></button>
+        <button class="nav-item locked" type="button" data-soon><i class="ico ico-trophy"></i><span data-i18n="nav.rank"></span></button>
+      </nav>
+    </section>
+
+    <!-- انتخاب دسته -->
+    <section id="screen-deck" class="screen deck">
+      <header class="bar">
+        <button id="deck-back" class="btn blue small" type="button"></button>
+        <h2 id="deck-title"></h2>
+        <span id="deck-count" class="pill"></span>
+      </header>
+      <p id="deck-hint" class="muted pad"></p>
+      <div id="deck-grid" class="card-grid"></div>
+      <footer class="bar bottom">
+        <span id="deck-avg" class="muted"></span>
+        <button id="deck-reset" class="btn blue small" type="button"></button>
+        <button id="deck-save" class="btn gold" type="button"></button>
+      </footer>
+    </section>
+
+    <!-- صف مسابقه‌یابی / اتاق دوستانه -->
+    <section id="screen-queue" class="screen center splash">
+      <div class="radar" aria-hidden="true"><i></i><i></i><i></i></div>
+      <h2 id="queue-title"></h2>
+      <p id="queue-sub" class="muted"></p>
+      <div id="queue-code" class="room-code" hidden></div>
+      <div class="row">
+        <button id="queue-copy" class="btn blue" type="button" hidden></button>
+        <button id="queue-cancel" class="btn red" type="button"></button>
+      </div>
+    </section>
+
+    <!-- نبرد -->
+    <section id="screen-battle" class="screen">
+      <header class="battle-top">
+        <button id="battle-leave" class="btn red small" type="button"></button>
+        <div class="battle-score">
+          <span id="battle-opp" class="opp-name"></span>
+          <span class="score"><span class="crown you-c" aria-hidden="true">👑</span><span id="score-you" class="you">0</span><span class="sep">:</span><span id="score-opp" class="opp">0</span><span class="crown opp-c" aria-hidden="true">👑</span></span>
+        </div>
+        <div id="battle-timer" class="timer" aria-live="off">3:00</div>
+      </header>
+
+      <div id="arena-wrap" class="arena-wrap">
+        <canvas id="arena" aria-label="Battle arena"></canvas>
+        <div id="emote-bubble-opp" class="emote-bubble opp" hidden></div>
+        <div id="emote-bubble-you" class="emote-bubble you" hidden></div>
+        <div id="battle-banner" class="banner" hidden></div>
+        <div id="reconnect-overlay" class="overlay" hidden>
+          <div class="spinner" aria-hidden="true"></div>
+          <p id="reconnect-text"></p>
+        </div>
+      </div>
+
+      <div class="hud">
+        <div class="hand-row">
+          <div class="side-col">
+            <div id="next-card" class="next-card" aria-label=""></div>
+            <div class="emote-col">
+              <button id="emote-toggle" class="icon-btn" type="button" aria-label="💬">💬</button>
+              <div id="emote-panel" class="emote-panel" hidden></div>
+            </div>
+          </div>
+          <div id="hand" class="hand"></div>
+        </div>
+        <div class="elixir">
+          <div id="elixir-num" class="elixir-num">5</div>
+          <div class="elixir-bar"><div id="elixir-fill" class="elixir-fill"></div><div class="elixir-ticks"></div></div>
+        </div>
+      </div>
+      <div id="drag-ghost" class="drag-ghost" hidden></div>
+    </section>
+
+    <!-- نتیجه -->
+    <section id="screen-result" class="screen center splash">
+      <div class="result-crowns" id="result-crowns" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="panel result-panel">
+        <h1 id="result-title" class="result-title"></h1>
+        <p id="result-reason" class="muted"></p>
+        <div id="result-stats" class="stats"></div>
+        <p id="result-note" class="muted note"></p>
+        <div class="row">
+          <button id="result-again" class="btn gold" type="button"></button>
+          <button id="result-home" class="btn blue" type="button"></button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <button id="sound-prompt" class="sound-prompt" type="button" hidden></button>
+  <div id="modal-root"></div>
+  <div id="toast-root" aria-live="polite"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>
